@@ -1,2 +1,5 @@
-# la-fantasia-pythonica
-python game
+# La Fantasia Pythonica
+
+A fantasy RPG to learn Python through magic.
+
+🚧 Work in progress
