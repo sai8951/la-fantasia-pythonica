@@ -256,9 +256,8 @@ button:disabled {
 
 #lineNumbers {
     margin: 0;
-    padding: 1rem 0.5rem;
-
-    width: 3em;
+    width: 2.2rem;
+    padding: 1rem 0.25rem;
 
     line-height: 1.4;
 
@@ -285,7 +284,6 @@ button:disabled {
 
     resize: none;
 
-    width: 100%;
     height: clamp(120px, 22vh, 220px);
     box-sizing: border-box;
 
