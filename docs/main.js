@@ -56,7 +56,7 @@ function nextMessage() {
         runButton.textContent =
             game.lang === "ja"
                 ? "⚡️ 発動"
-                : "⚡️ Burst";
+                : "⚡️ Cast";
 
         return;
     }
