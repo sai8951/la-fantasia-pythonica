@@ -30,7 +30,7 @@ const chapter0 = {
         {
             speaker: { ja: "???", en: "???" },
             text: {
-                ja: "私を手に取りなさい......。表紙を捲りなさい......",
+                ja: "私を手に取りなさい...... 表紙を捲りなさい......",
                 en: "Take me into your hands... Turn the cover..."
             }
         },
