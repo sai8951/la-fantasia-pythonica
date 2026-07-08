@@ -6,6 +6,10 @@ const contractScreen = document.getElementById("contractScreen");
 const gameScreen = document.getElementById("gameScreen");
 const messageBox = document.getElementById("messageBox");
 
+const chapterTitleScreen = document.getElementById("chapterTitleScreen");
+const chapterNumber = document.getElementById("chapterNumber");
+const chapterTitleText = document.getElementById("chapterTitleText");
+
 const contractTitle = document.getElementById("contractTitle");
 const contractText = document.getElementById("contractText");
 const nameInput = document.getElementById("nameInput");
@@ -27,38 +31,97 @@ const futureSightButton = document.getElementById("futureSightButton");
 const successHint = document.getElementById("successHint");
 const successText = document.getElementById("successText");
 
+const flashOverlay = document.getElementById("flashOverlay");
+
+let currentChapter = chapter0;
+let chapterIndex = 0;
+
+const chapters = [
+    chapter0,
+    chapter1,
+    chapter2
+];
+
 const game = {
     lang: "ja",
     playerName: "",
     mistakeCount: 0,
     currentQuestion: null,
-    questionSolved: false
+    questionSolved: false,
+    isBusy: false
 };
 
 let index = 0;
 
+function playFlash() {
+    game.isBusy = true;
+    hideMessageBox();
+
+    flashOverlay.classList.remove("hidden");
+    flashOverlay.classList.remove("flash");
+
+    void flashOverlay.offsetWidth;
+
+    flashOverlay.classList.add("flash");
+
+    setTimeout(() => {
+        flashOverlay.classList.add("hidden");
+        flashOverlay.classList.remove("flash");
+
+        game.isBusy = false;
+
+        index++;
+        showMessage();
+    }, 2500);
+}
+
+function hideMessageBox() {
+    messageBox.classList.add("hidden");
+    messageBox.classList.remove("clickable");
+}
+
+function showChapterTitle() {
+    game.isBusy = true;
+    hideMessageBox();
+
+    chapterNumber.textContent = `Chapter ${currentChapter.chapterNumber}`;
+    chapterTitleText.textContent = `〜${currentChapter.title[game.lang]}〜`;
+
+    chapterTitleScreen.classList.remove("hidden");
+    chapterTitleScreen.classList.remove("show");
+
+    void chapterTitleScreen.offsetWidth;
+
+    chapterTitleScreen.classList.add("show");
+
+    setTimeout(() => {
+        chapterTitleScreen.classList.add("hidden");
+        chapterTitleScreen.classList.remove("show");
+
+        game.isBusy = false;
+
+        index++;
+        showMessage();
+    }, 3000);
+}
+
 function nextMessage() {
     index++;
 
-    if (index >= scenario.length) {
-        game.currentQuestion = "print_name";
-        startQuestion();
+    if (index >= currentChapter.scenario.length) {
+        chapterIndex++;
 
-        instruction.textContent =
-            game.lang === "ja"
-                ? "name を世界へ響かせてください。"
-                : "Output name.";
+        if (chapterIndex >= chapters.length) {
+            hideMessageBox();
+            codeScreen.classList.add("hidden");
+            gameScreen.classList.remove("hidden");
+            toBeContinued.classList.remove("hidden");
+            return;
+        }
 
-        futureSightButton.textContent =
-            game.lang === "ja"
-                ? "🔮 未来視"
-                : "🔮 Future Insight";
-
-        runButton.textContent =
-            game.lang === "ja"
-                ? "⚡️ 発動"
-                : "⚡️ Cast";
-
+        currentChapter = chapters[chapterIndex];
+        index = 0;
+        showMessage();
         return;
     }
 
@@ -66,12 +129,18 @@ function nextMessage() {
 }
 
 document.addEventListener("keydown", (event) => {
+    if (game.isBusy) {
+        event.preventDefault();
+        return;
+    }
+
     if (event.target === codeInput || event.target === nameInput) {
         return;
     }
 
     if (
         game.questionSolved &&
+        !successHint.classList.contains("hidden") &&
         (event.key === "Enter" || event.key === " ")
     ) {
         event.preventDefault();
@@ -79,67 +148,35 @@ document.addEventListener("keydown", (event) => {
         return;
     }
 
-    if (gameScreen.classList.contains("hidden")) {
-        return;
-    }
-
     if (codeScreen && !codeScreen.classList.contains("hidden")) {
         return;
     }
 
-    if (event.key === "Enter" || event.key === " ") {
+    const isMessageVisible = !messageBox.classList.contains("hidden");
+
+    if (
+        isMessageVisible &&
+        (event.key === "Enter" || event.key === " ")
+    ) {
         event.preventDefault();
         nextMessage();
     }
 });
 
-const scenario = [
-    {
-        speaker: {
-            ja: "案内人",
-            en: "Guide"
-        },
-        text: {
-            ja: "{player}よ、契約は成立しました。",
-            en: "{player}, the contract is complete."
-        }
-    },
-    {
-        speaker: {
-            ja: "案内人",
-            en: "Guide"
-        },
-        text: {
-            ja: "この世界では、文字はただの言葉ではありません。",
-            en: "In this world, letters are not mere words."
-        }
-    },
-    {
-        speaker: {
-            ja: "案内人",
-            en: "Guide"
-        },
-        text: {
-            ja: "コードです。",
-            en: "They are code."
-        }
-    },
-    {
-        speaker: {
-            ja: "案内人",
-            en: "Guide"
-        },
-        text: {
-            ja: "では次に、自らの名をこの世界へ出力してみましょう。",
-            en: "Now, let us output your name into this world."
-        }
-    }
-];
-
 function startContract(selectedLang) {
     game.lang = selectedLang;
 
     titleScreen.classList.add("hidden");
+
+    currentChapter = chapters[0];
+    chapterIndex = 0;
+    index = 0;
+
+    showMessage();
+}
+
+function showContractScreen() {
+    gameScreen.classList.add("hidden");
     contractScreen.classList.remove("hidden");
 
     contractTitle.textContent =
@@ -149,8 +186,8 @@ function startContract(selectedLang) {
 
     contractText.textContent =
         game.lang === "ja"
-            ? "羊皮紙に名を刻みなさい。"
-            : "Write your name upon the parchment.";
+            ? "最初のページに名を刻みなさい。"
+            : "Write your name upon the first page.";
 
     signButton.textContent =
         game.lang === "ja"
@@ -183,14 +220,46 @@ function signContract() {
     contractScreen.classList.add("hidden");
     gameScreen.classList.remove("hidden");
 
-    index = 0;
+    index++;
     showMessage();
 }
 
 function showMessage() {
-    speaker.textContent = scenario[index].speaker[game.lang];
+    const currentMessage = currentChapter.scenario[index];
 
-    message.textContent = scenario[index].text[game.lang].replace(
+    if (currentMessage.type === "flash") {
+        hideMessageBox();
+        playFlash();
+        return;
+    }
+
+    if (currentMessage.type === "contract") {
+        hideMessageBox();
+        showContractScreen();
+        return;
+    }
+
+    if (currentMessage.type === "chapterTitle") {
+        hideMessageBox();
+        showChapterTitle();
+        return;
+    }
+
+    if (currentMessage.type === "question") {
+        hideMessageBox();
+        startQuestionById(currentMessage.questionId);
+        return;
+    }
+
+    gameScreen.classList.remove("hidden");
+    messageBox.classList.remove("hidden");
+
+    speaker.textContent = currentMessage.speaker[game.lang].replace(
+        "{player}",
+        game.playerName
+    );
+
+    message.textContent = currentMessage.text[game.lang].replace(
         "{player}",
         game.playerName
     );
@@ -200,6 +269,7 @@ function showMessage() {
             ? "クリックして進む "
             : "Click to continue ";
 
+    messageBox.classList.remove("hidden");
     messageBox.classList.add("clickable");
 }
 
@@ -302,6 +372,30 @@ function startQuestion() {
     successHint.classList.add("hidden");
 }
 
+function fillText(text) {
+    return text.replace("{player}", game.playerName);
+}
+
+function startQuestionById(questionId) {
+    game.currentQuestion = questionId;
+
+    startQuestion();
+
+    const question = currentChapter.questions[questionId];
+
+    instruction.textContent = question.instruction[game.lang];
+
+    futureSightButton.textContent =
+        game.lang === "ja"
+            ? "🔮 未来視"
+            : "🔮 Future Insight";
+
+    runButton.textContent =
+        game.lang === "ja"
+            ? "⚡️ 発動"
+            : "⚡️ Cast";
+}
+
 function endQuestion() {
     codeScreen.classList.add("hidden");
 }
@@ -309,29 +403,21 @@ function endQuestion() {
 function previewCode() {
     const code = codeInput.value.trim();
     const consoleBox = document.getElementById("console");
+    const question = currentChapter.questions[game.currentQuestion];
 
     consoleBox.classList.add("futureSight");
 
-    if (code === "print(name)") {
-        consoleOutput.textContent =
-            game.lang === "ja"
-                ? `🔮 未来視 🔮\n\n${game.playerName}`
-                : `🔮 Future Insight 🔮\n\n${game.playerName}`;
-        return;
-    }
-
     if (code === "") {
-        consoleOutput.textContent =
-            game.lang === "ja"
-                ? "🔮 未来視 🔮\n\nまだ未来は見えない。"
-                : "🔮 Future Insight 🔮\n\nNo future can be seen yet.";
+        consoleOutput.textContent = fillText(question.preview.empty[game.lang]);
         return;
     }
 
-    consoleOutput.textContent =
-        game.lang === "ja"
-            ? "🔮 未来視 🔮\n\nこのままでは魔法が乱れそう。"
-            : "🔮 Future Insight 🔮\n\nThe spell will fail as it is.";
+    if (code === question.answer) {
+        consoleOutput.textContent = fillText(question.preview.correct[game.lang]);
+        return;
+    }
+
+    consoleOutput.textContent = fillText(question.preview.wrong[game.lang]);
 }
 
 futureSightButton.addEventListener("click", (event) => {
@@ -342,14 +428,12 @@ futureSightButton.addEventListener("click", (event) => {
 function runCode() {
     document.getElementById("console").classList.remove("futureSight");
     const code = codeInput.value.trim();
+    const question = currentChapter.questions[game.currentQuestion];
 
-    if (code === "print(name)") {
+    if (code === question.answer) {
         game.questionSolved = true;
 
-        consoleOutput.textContent =
-            game.lang === "ja"
-                ? `あなたの名前は\n\n ✨ ${game.playerName} ✨\n\n最初の魔法が世界に響きました。`
-                : `Your name is\n\n ✨ ${game.playerName} ✨\n\nYour first spell echoed through the world.`;
+        consoleOutput.textContent = fillText(question.success[game.lang]);
 
         successText.textContent =
             game.lang === "ja"
@@ -368,57 +452,27 @@ function runCode() {
 
     game.mistakeCount++;
 
-    if (game.lang === "ja") {
+    const hintIndex = Math.min(
+        game.mistakeCount - 1,
+        question.hints.length - 1
+    );
 
-        if (game.mistakeCount === 1) {
-
-            consoleOutput.textContent =
-`契約で刻んだ名前は 変数 name に
-
-name = "${game.playerName}"
-
-として宿っています。
-
-name を出力してください。`;
-
-        } else {
-
-            consoleOutput.textContent =
-`もう少しです。
-
-print(name)
-
-としてみましょう。`;
-
-        }
-
-    } else {
-
-        if (game.mistakeCount === 1) {
-
-            consoleOutput.textContent =
-`The name you inscribed upon the contract now dwells within the variable name as
-
-name = "${game.playerName}"
-
-Output name.`;
-
-        } else {
-
-            consoleOutput.textContent =
-`Try
-
-print(name)`;
-
-        }
-
-    }
+    consoleOutput.textContent = fillText(
+        question.hints[hintIndex][game.lang]
+    );
 };
 
 function finishQuestion() {
+    game.questionSolved = false;
+    game.currentQuestion = null;
+
     successHint.classList.remove("clickable");
+    successHint.classList.add("hidden");
+
     endQuestion();
-    toBeContinued.classList.remove("hidden");
+
+    index++;
+    showMessage();
 }
 
 successHint.addEventListener("click", finishQuestion);
