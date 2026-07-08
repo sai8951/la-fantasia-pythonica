@@ -20,7 +20,7 @@ const chapter0 = {
         {
             speaker: { ja: "", en: "" },
             text: {
-                ja: "幼少期に、絶対に入ってはいけないと言われた家の書庫に入ったことがある......",
+                ja: "幼少期、絶対に入ってはいけないと言われた家の書庫に入ったことがある......。",
                 en: "When I was a child, I once entered the family library I had been strictly forbidden to enter..."
             }
         },

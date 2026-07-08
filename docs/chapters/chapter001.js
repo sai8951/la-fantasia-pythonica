@@ -25,6 +25,20 @@ const chapter1 = {
             }
         },
         {
+            speaker: { ja: "{player}", en: "{player}" },
+            text: {
+                ja: "あれは夢だったのかもしれない。",
+                en: "That might have been a dream."
+            }
+        },
+        {
+            speaker: { ja: "{player}", en: "{player}" },
+            text: {
+                ja: "だが、たまに思い出したように名前を響かせて遊ぶことがある。",
+                en: "But sometimes, as if recalling a memory, I play with the sound of my name."
+            }
+        },
+        {
             type: "question",
             questionId: "print_name"
         },
@@ -38,8 +52,8 @@ const chapter1 = {
         {
             speaker: { ja: "{player}", en: "{player}" },
             text: {
-                ja: "今のは......魔法？",
-                en: "Was that... magic?"
+                ja: ".今日も響いた。やはり夢ではないのか。",
+                en: "It echoed again today. Perhaps it was not a dream after all."
             }
         },
         {
