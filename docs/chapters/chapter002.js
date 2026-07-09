@@ -27,15 +27,15 @@ const chapter2 = {
         {
             speaker: { ja: "少女", en: "Girl" },
             text: {
-                ja: "先ほど、世界にあなたの魔力が観測されました。",
-                en: "I just detected your magical power in this world."
+                ja: "世界中に響くあなたの魔力が観測されました。",
+                en: "I just detected your magical power resonating throughout the world."
             }
         },
         {
             speaker: { ja: "少女", en: "Girl" },
             text: {
-                ja: "その魔法は現代では失われています。",
-                en: "That magic has been lost in modern times."
+                ja: "それは現代では失われた魔法です。",
+                en: "That magic has been lost in the modern era."
             }
         }
     ],

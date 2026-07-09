@@ -45,7 +45,7 @@ const chapter1 = {
         {
             speaker: { ja: "{player}", en: "{player}" },
             text: {
-                ja: "......声にしたつもりはない。だが、世界そのものが我が名を響かせた。",
+                ja: "......声にしたつもりはない。だが、世界そのものが我が名を轟かせた。",
                 en: "...I did not intend to speak it aloud. Yet, the world itself echoed my name."
             }
         },
@@ -90,18 +90,18 @@ const chapter1 = {
             },
 
             success: {
-                ja: "あなたの名前は\n\n ✨ {player} ✨\n\n最初の魔法が世界に響きました。",
-                en: "Your name is\n\n ✨ {player} ✨\n\nYour first spell echoed through the world."
+                ja: "あなたの名前は\n ✨ {player} ✨\n魔法が世界に響きました。",
+                en: "Your name is\n ✨ {player} ✨\nYour spell echoed through the world."
             },
 
             hints: [
                 {
-                    ja: "契約で刻んだ名前は 変数 name に\n\nname = \"{player}\"\n\nとして宿っています。\n\nname を出力してください。",
-                    en: "The name you inscribed upon the contract now dwells within the variable name as\n\nname = \"{player}\"\n\nOutput name."
+                    ja: "契約で刻んだ名前は 変数 name に\nname = \"{player}\"\nとして宿っています。\nname を出力してください。",
+                    en: "The name you inscribed upon the contract now dwells within the variable name as\nname = \"{player}\"\nOutput name."
                 },
                 {
-                    ja: "もう少しです。\n\nprint(name)\n\nとしてみましょう。",
-                    en: "Try\n\nprint(name)"
+                    ja: "もう少しです。\nprint(name)\nとしてみましょう。",
+                    en: "Try\nprint(name)"
                 }
             ]
         }

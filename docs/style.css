@@ -367,26 +367,58 @@ button:disabled {
 #console {
     margin: 0;
     margin-top: 0;
-    padding: 1rem;
 
     width: 100%;
-    min-height: clamp(100px, 16vh, 160px);
+    height: 9rem;
+    padding: 1rem;
 
-    box-sizing: border-box;
     border: 1px solid #555;
-    transition: border-color 0.3s, color 0.3s;
+    box-sizing: border-box;
+    transition: border-color 0.3s, box-shadow 0.3s;
 
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+    overflow-x: hidden;
+
+    display: block;
 }
 
 #consoleText {
+    display: block;
     white-space: pre-wrap;
     text-align: center;
+    line-height: 1.6;
     font-size: clamp(14px, 1.2vw, 16px);
     font-family: monospace;
     color: lightskyblue;
+    transition: color 0.3s;
+}
+
+/* default console */
+#console::-webkit-scrollbar {
+    width: 5px;
+}
+
+#console::-webkit-scrollbar-track {
+    background: #111;
+}
+
+#console::-webkit-scrollbar-thumb {
+    background: lightskyblue;
+    border-radius: 999px;
+}
+
+#console::-webkit-scrollbar-thumb:hover {
+    background: deepskyblue;
+}
+
+/* when futureSight is active */
+#console.futureSight::-webkit-scrollbar-thumb {
+    background: mediumorchid;
+}
+
+#console.futureSight::-webkit-scrollbar-thumb:hover {
+    background: #c070ff;
 }
 
 #console.futureSight {
@@ -468,6 +500,10 @@ h1 {
     #messageBox,
     #codePanel {
         max-width: 100%;
+    }
+
+    #console {
+        height: 7rem;
     }
 
     #nameAssignment {
