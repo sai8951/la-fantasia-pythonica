@@ -57,7 +57,7 @@ const chapter1 = {
             }
         },
         {
-            speaker: { ja: "", en: "" },
+            speaker: { ja: " ", en: "" },
             text: {
                 ja: "(ノックの音)",
                 en: "(Knock)"
