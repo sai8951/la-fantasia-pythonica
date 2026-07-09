@@ -28,7 +28,7 @@ const chapter2 = {
             speaker: { ja: "少女", en: "Girl" },
             text: {
                 ja: "世界中に響くあなたの魔力が観測されました。",
-                en: "I just detected your magical power resonating throughout the world."
+                en: "I have been detected your magical power resonating throughout the world."
             }
         },
         {
