@@ -7,17 +7,17 @@ body {
     min-height: 100dvh;
 }
 
-html,
-body {
-    overflow-x: hidden;
-}
-
 #titleScreen,
 #contractScreen,
 #gameScreen {
     min-height: 100vh;
     min-height: 100dvh;
-    padding: 1rem;
+    /* padding: 1rem; */
+    padding:
+        max(1rem, env(safe-area-inset-top))
+        1rem
+        max(1rem, env(safe-area-inset-bottom))
+        1rem;
     box-sizing: border-box;
 
     display: flex;
@@ -30,7 +30,6 @@ body {
 #parchment,
 #messageBox {
     width: min(90vw, 1000px);
-    width: min(90dvw, 1000px);
     box-sizing: border-box;
 }
 
@@ -179,7 +178,6 @@ button:disabled {
 
 #parchment {
     width: 80%;
-    width: 80dvw;
     max-width: 600px;
     min-height: 260px;
 
@@ -214,7 +212,6 @@ button:disabled {
 
 #nameInput {
     width: min(10em, 45vw);
-    width: min(10em, 45dvw);
 
     font-family: monospace;
     font-size: 1.1rem;
@@ -225,7 +222,6 @@ button:disabled {
 
 #messageBox {
     width: 80%;
-    width: 80dvw;
     max-width: 800px;
 
     border: 1px solid white;
@@ -273,7 +269,6 @@ button:disabled {
 #gameScreen {
     width: 100%;
     position: relative;
-    overflow: hidden;
 }
 
 #codeScreen {
@@ -304,7 +299,6 @@ button:disabled {
 
 #codePanel {
     width: 80vw;
-    width: 80dvw;
     max-width: 1000px;
     height: 70vh;
     height: 70dvh;
@@ -481,8 +475,8 @@ h1 {
     }
 
     #codePanel {
-        width: min(94vw, 100%);
-        width: min(94dvw, 100%);
+        /* width: 94vw; */
+        width: 94dvh;
         height: 72vh;
         height: 72dvh;
         min-height: 0;
