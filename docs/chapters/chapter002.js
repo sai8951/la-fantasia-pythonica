@@ -27,7 +27,7 @@ const chapter2 = {
         {
             speaker: { ja: "少女", en: "Girl" },
             text: {
-                ja: "世界中に響くあなたの魔力が観測されました。",
+                ja: "世界中に響くあなたの魔力が観測されています。",
                 en: "I have been detected your magical power resonating throughout the world."
             }
         },
@@ -38,14 +38,5 @@ const chapter2 = {
                 en: "That magic has been lost in the modern era."
             }
         }
-    ],
-
-    question: {
-        id: "print_name",
-        instruction: {
-            ja: "あなたの name を世界へ響かせてください。",
-            en: "Echo your name into the world."
-        },
-        answer: "print(name)"
-    }
+    ]
 };
