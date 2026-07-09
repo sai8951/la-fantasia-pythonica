@@ -178,7 +178,8 @@ button:disabled {
 
 #parchment {
     width: 80%;
-    max-width: 600px;
+    /* max-width: 600px; */
+    max-width: 100%;
     min-height: 260px;
 
     background: #e7d3a1;
@@ -459,6 +460,12 @@ h1 {
 }
 
 @media (max-width: 600px) {
+    #parchment,
+    #messageBox,
+    #codePanel {
+        max-width: 100%;
+    }
+
     #nameAssignment {
         font-size: 0.9rem;
         gap: 0.1rem;
