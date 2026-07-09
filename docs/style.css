@@ -7,6 +7,11 @@ body {
     min-height: 100dvh;
 }
 
+html,
+body {
+    overflow-x: hidden;
+}
+
 #titleScreen,
 #contractScreen,
 #gameScreen {
@@ -269,6 +274,7 @@ button:disabled {
 #gameScreen {
     width: 100%;
     position: relative;
+    overflow: hidden;
 }
 
 #codeScreen {
