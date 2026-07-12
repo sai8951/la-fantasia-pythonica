@@ -766,22 +766,22 @@ h1 {
 
 .menu-button.grimoire-awakening {
     animation:
-        grimoireButtonGlow 1.5s ease-in-out 1;
+        grimoireButtonGlow 2.0s ease-in-out 2;
 }
 
 .menu-button.grimoire-awakening::before {
     animation:
-        grimoireInnerAura 1.5s ease-in-out 1;
+        grimoireInnerAura 2.0s ease-in-out 2;
 }
 
 .menu-button.grimoire-awakening::after {
     animation:
-        grimoireOuterAura 1.5s ease-out 1;
+        grimoireOuterAura 2.0s ease-out 2;
 }
 
 .menu-button.grimoire-awakening > span {
     animation:
-        grimoireIconGlow 1.5s ease-in-out 1;
+        grimoireIconGlow 2.0s ease-in-out 2;
 }
 
 

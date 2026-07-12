@@ -771,19 +771,13 @@ function finishQuestion() {
     continueStory();
 
     if (awakenedNow) {
-        playGrimoireMenuEffect(
-            "awakening",
-            continueStory
-        );
-        return;
-    }
-
-    if (unlockedNewPage) {
-        playGrimoireMenuEffect(
-            "page",
-            continueStory
-        );
-        return;
+        setTimeout(() => {
+            playGrimoireMenuEffect("awakening");
+        }, 200);
+    } else if (unlockedNewPage) {
+        setTimeout(() => {
+            playGrimoireMenuEffect("page");
+        }, 200);
     }
 }
 
@@ -794,7 +788,7 @@ function updateGrimoireMenuVisibility() {
     );
 }
 
-function playGrimoireMenuEffect(type, onComplete) {
+function playGrimoireMenuEffect(type) {
     const effectClass =
         type === "awakening"
             ? "grimoire-awakening"
@@ -818,8 +812,6 @@ function playGrimoireMenuEffect(type, onComplete) {
 
     window.setTimeout(() => {
         menuButton.classList.remove(effectClass);
-
-        onComplete();
     }, duration);
 }
 
@@ -938,47 +930,6 @@ function findGrimoirePage(pageId) {
     return grimoirePages.find(
         (page) => page.id === pageId
     );
-}
-
-function playGrimoireEffect(type, question, onComplete) {
-    if (type === "awakening") {
-        grimoireUnlockLabel.textContent =
-            game.lang === "ja"
-                ? "謎の紙束が光を帯びた"
-                : "The mysterious pages began to glow";
-
-        grimoireUnlockTitle.textContent =
-            game.lang === "ja"
-                ? "魔導書が目覚めた"
-                : "The Grimoire Awakened";
-    } else {
-        grimoireUnlockLabel.textContent =
-            game.lang === "ja"
-                ? "魔導書に新たな頁が刻まれた"
-                : "A new page was inscribed in the Grimoire";
-
-        grimoireUnlockTitle.textContent =
-            question.grimoireUnlockTitle?.[game.lang]
-            ?? (
-                game.lang === "ja"
-                    ? "新たな頁"
-                    : "A New Page"
-            );
-    }
-
-    grimoireUnlockOverlay.classList.remove("hidden");
-    grimoireUnlockOverlay.classList.remove("show");
-
-    void grimoireUnlockOverlay.offsetWidth;
-
-    grimoireUnlockOverlay.classList.add("show");
-
-    window.setTimeout(() => {
-        grimoireUnlockOverlay.classList.add("hidden");
-        grimoireUnlockOverlay.classList.remove("show");
-
-        onComplete();
-    }, 1000);
 }
 
 const CLEARED_CHAPTERS_KEY = "clearedChapters";
