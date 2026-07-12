@@ -405,6 +405,13 @@ function showMessage() {
     }
 
     if (currentMessage.type === "contract") {
+
+        if (game.isReplay) {
+            index++;
+            showMessage();
+            return;
+        }
+
         hideMessageBox();
         showContractScreen();
         return;
@@ -832,7 +839,7 @@ function renderMemory() {
     memoryChapterList.innerHTML = "";
 
     if (language === "ja") {
-        memoryTitle.textContent = "記憶";
+        memoryTitle.textContent = "Memory";
         memoryDescription.textContent = "魔導書に刻まれた記憶";
         closeMemoryButton.setAttribute("aria-label", "閉じる");
     } else if (language === "en") {
