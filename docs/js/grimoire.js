@@ -112,7 +112,7 @@ function renderPage(page) {
 
         <pre><code>${escapeHtml(page.code)}</code></pre>
 
-        <h3>${language === "ja" ? "発動結果" : "Output"}</h3>
+        <h3>${language === "ja" ? "発動結果" : "Spell Effect"}</h3>
 
         <pre><code>${escapeHtml(page.output)}</code></pre>
     `;
