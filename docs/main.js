@@ -553,7 +553,7 @@ async function runCode() {
         result = await executeCurrentCode(code, question);
     } catch (error) {
         if (error.type === "execution-timeout") {
-            handleWrongAnswer(executionStatusText("timeout"));
+            handleWrongAnswer();
         } else {
             consoleOutput.textContent = executionStatusText("loadError");
             consoleElement.scrollTop = 0;
@@ -579,10 +579,10 @@ async function runCode() {
         return;
     }
 
-    handleWrongAnswer(formatExecutionResult(result));
+    handleWrongAnswer();
 }
 
-function handleWrongAnswer(executionOutput) {
+function handleWrongAnswer() {
     const question = currentChapter.questions[game.currentQuestion];
     game.mistakeCount++;
 
@@ -592,9 +592,7 @@ function handleWrongAnswer(executionOutput) {
     );
 
     const hint = fillText(question.hints[hintIndex][game.lang]);
-    consoleOutput.textContent = executionOutput
-        ? `${executionOutput}\n\n${hint}`
-        : hint;
+    consoleOutput.textContent = hint;
     consoleElement.scrollTop = 0;
 }
 
