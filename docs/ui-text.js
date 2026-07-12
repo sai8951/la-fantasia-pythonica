@@ -34,5 +34,35 @@ const uiText = {
     runButton: {
         ja: "⚡️ 発動",
         en: "⚡️ Cast"
+    },
+    executionErrors: {
+        unclosed: {
+            ja: "{line}行目付近に、開かれたままのものがある......？",
+            en: "Something seems to have been left open near line {line}...?"
+        },
+        indentation: {
+            ja: "{line}行目付近で、術式の階層が乱れている......。",
+            en: "Near line {line}, the layers of the spell have fallen out of alignment..."
+        },
+        name: {
+            ja: "{line}行目付近で、まだ名を持たぬものを呼んだ気がする......。",
+            en: "Near line {line}, I sense a call to something that has not yet been given a name..."
+        },
+        type: {
+            ja: "{line}行目付近で、異なる性質の魔力が噛み合っていない......。",
+            en: "Near line {line}, powers of different natures refuse to flow together..."
+        },
+        zeroDivision: {
+            ja: "{line}行目付近で、無へ分かとうとした......？",
+            en: "Near line {line}, was I trying to divide by the void...?"
+        },
+        generic: {
+            ja: "{line}行目付近に、魔力の流れの乱れを感じる。",
+            en: "I sense a disturbance in the flow of magic near line {line}."
+        },
+        unknown: {
+            ja: "どこかに、魔力の流れの乱れを感じる。",
+            en: "Somewhere, I sense a disturbance in the flow of magic."
+        }
     }
 };
