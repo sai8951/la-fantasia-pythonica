@@ -10,23 +10,32 @@ const chapterLinks = document.getElementById("chapterLinks");
 const PLAYER_PROFILE_STORAGE_KEY = "la-fantasia-pythonica.profile.v1";
 let lastMenuFocus = null;
 
-function getSavedProfile() {
+function getStoredProfile() {
     try {
         const profile = JSON.parse(localStorage.getItem(PLAYER_PROFILE_STORAGE_KEY));
 
-        if (
-            profile &&
-            (profile.lang === "ja" || profile.lang === "en") &&
-            typeof profile.playerName === "string" &&
-            profile.playerName.trim() !== ""
-        ) {
+        if (profile && typeof profile === "object" && !Array.isArray(profile)) {
             return {
-                lang: profile.lang,
-                playerName: profile.playerName.trim()
+                ...(profile.lang === "ja" || profile.lang === "en"
+                    ? { lang: profile.lang }
+                    : {}),
+                ...(typeof profile.playerName === "string" && profile.playerName.trim() !== ""
+                    ? { playerName: profile.playerName.trim() }
+                    : {})
             };
         }
     } catch {
         // Ignore malformed or unavailable local storage data.
+    }
+
+    return {};
+}
+
+function getSavedProfile() {
+    const profile = getStoredProfile();
+
+    if (profile.lang && profile.playerName) {
+        return profile;
     }
 
     return null;
@@ -38,6 +47,13 @@ function saveProfile(profile) {
     } catch {
         // The game remains playable when storage is unavailable.
     }
+}
+
+function saveSelectedLanguage(lang) {
+    saveProfile({
+        ...getStoredProfile(),
+        lang
+    });
 }
 
 function applyProfile(profile) {
@@ -186,6 +202,19 @@ window.addEventListener("player-profile-saved", (event) => {
     saveProfile(event.detail);
     renderChapterMenu();
 });
+
+window.addEventListener("language-selected", (event) => {
+    saveSelectedLanguage(event.detail.lang);
+    document.body.classList.remove("chapterMenuHidden");
+    renderChapterMenu();
+});
+
+const storedProfile = getStoredProfile();
+
+if (storedProfile.lang) {
+    game.lang = storedProfile.lang;
+    document.documentElement.lang = storedProfile.lang;
+}
 
 const savedProfile = getSavedProfile();
 

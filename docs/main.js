@@ -269,6 +269,9 @@ document.addEventListener("keydown", (event) => {
 function startContract(selectedLang) {
     game.lang = selectedLang;
     document.documentElement.lang = selectedLang;
+    window.dispatchEvent(new CustomEvent("language-selected", {
+        detail: { lang: selectedLang }
+    }));
 
     titleScreen.classList.add("hidden");
 

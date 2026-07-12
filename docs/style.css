@@ -53,6 +53,11 @@ body {
     cursor: pointer;
 }
 
+body.chapterMenuHidden #chapterMenuButton,
+body.chapterMenuHidden #chapterMenuOverlay {
+    display: none;
+}
+
 #chapterMenuButton {
     position: fixed;
     top: max(1rem, env(safe-area-inset-top));
