@@ -841,7 +841,7 @@ function renderMemory() {
             "Memories engraved upon the Grimoire";
         closeMemoryButton.setAttribute("aria-label", "Close");
     } else {
-        memoryTitle.textContent = "Memory / 記憶";
+        memoryTitle.textContent = "Memory";
         memoryDescription.textContent =
             "Memories engraved upon the Grimoire / 魔導書に刻まれた記憶";
         closeMemoryButton.setAttribute(
