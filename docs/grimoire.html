@@ -13,16 +13,6 @@
 </head>
 
 <body>
-    <div class="language-switch">
-        <button id="jaButton" type="button">
-            日本語
-        </button>
-
-        <button id="enButton" type="button">
-            English
-        </button>
-    </div>
-
     <header class="page-header">
         <a
             id="backButton"
@@ -33,12 +23,8 @@
         </a>
 
         <h1 id="pageTitle">魔導書</h1>
-    </header>
 
-    <div id="languageButtons" class="language-buttons hidden">
-        <p>Language / 言語</p>
-
-        <div class="language-button-row">
+        <div class="language-switch">
             <button id="jaButton" type="button">
                 日本語
             </button>
@@ -47,6 +33,14 @@
                 English
             </button>
         </div>
+    </header>
+
+    <div class="mobile-page-selector">
+        <label id="mobilePageLabel" for="mobilePageSelect">
+            頁を選ぶ
+        </label>
+
+        <select id="mobilePageSelect"></select>
     </div>
 
     <main class="grimoire-layout">

@@ -10,9 +10,11 @@ const pageList = document.getElementById("pageList");
 const pageContent = document.getElementById("pageContent");
 const pageTitle = document.getElementById("pageTitle");
 const backButton = document.getElementById("backButton");
-const languageButtons = document.getElementById("languageButtons");
 const jaButton = document.getElementById("jaButton");
 const enButton = document.getElementById("enButton");
+
+const mobilePageSelect = document.getElementById("mobilePageSelect");
+const mobilePageLabel = document.getElementById("mobilePageLabel");
 
 function applyLanguage(selectedLanguage) {
     language = selectedLanguage;
@@ -38,17 +40,23 @@ function applyLanguage(selectedLanguage) {
             ? "← 戻る"
             : "← Back";
 
+    mobilePageLabel.textContent =
+        language === "ja"
+            ? "頁を選ぶ"
+            : "Select a Page";
+
     renderPageList();
 
     if (grimoirePages.length > 0) {
-        renderPage(grimoirePages[0]);
+        selectPage(0);
     }
 }
 
 function renderPageList() {
     pageList.innerHTML = "";
+    mobilePageSelect.innerHTML = "";
 
-    grimoirePages.forEach((page) => {
+    grimoirePages.forEach((page, pageIndex) => {
         const button = document.createElement("button");
 
         button.type = "button";
@@ -56,20 +64,43 @@ function renderPageList() {
         button.textContent = page.title[language];
 
         button.addEventListener("click", () => {
-            renderPage(page);
-
-            document
-                .querySelectorAll(".page-list-button")
-                .forEach((item) => {
-                    item.classList.remove("active");
-                });
-
-            button.classList.add("active");
+            selectPage(pageIndex);
         });
 
         pageList.appendChild(button);
+
+        const option = document.createElement("option");
+
+        option.value = String(pageIndex);
+        option.textContent = page.title[language];
+
+        mobilePageSelect.appendChild(option);
     });
 }
+
+function selectPage(pageIndex) {
+    const page = grimoirePages[pageIndex];
+
+    if (!page) {
+        return;
+    }
+
+    renderPage(page);
+    mobilePageSelect.value = String(pageIndex);
+
+    document
+        .querySelectorAll(".page-list-button")
+        .forEach((button, index) => {
+            button.classList.toggle(
+                "active",
+                index === pageIndex
+            );
+        });
+}
+
+mobilePageSelect.addEventListener("change", () => {
+    selectPage(Number(mobilePageSelect.value));
+});
 
 function renderPage(page) {
     pageContent.innerHTML = `
@@ -81,7 +112,7 @@ function renderPage(page) {
 
         <pre><code>${escapeHtml(page.code)}</code></pre>
 
-        <h3>${language === "ja" ? "実行結果" : "Output"}</h3>
+        <h3>${language === "ja" ? "発動結果" : "Output"}</h3>
 
         <pre><code>${escapeHtml(page.output)}</code></pre>
     `;
@@ -105,7 +136,15 @@ enButton.addEventListener("click", () => {
 if (language === "ja" || language === "en") {
     applyLanguage(language);
 } else {
+    language = "ja";
+
     pageTitle.textContent = "Grimoire / 魔導書";
     backButton.textContent = "← Back / 戻る";
-    languageButtons.classList.remove("hidden");
+    mobilePageLabel.textContent = "Select a Page / 頁を選ぶ";
+
+    renderPageList();
+
+    if (grimoirePages.length > 0) {
+        selectPage(0);
+    }
 }

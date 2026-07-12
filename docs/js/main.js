@@ -47,6 +47,8 @@ const playQuestionButton = document.getElementById("playQuestionButton");
 const skipQuestionButton = document.getElementById("skipQuestionButton");
 
 const memoryButton = document.getElementById("memoryButton");
+const memoryJaButton = document.getElementById("memoryJaButton");
+const memoryEnButton = document.getElementById("memoryEnButton");
 const memoryModal = document.getElementById("memoryModal");
 const memoryTitle = document.getElementById("memoryTitle");
 const memoryDescription = document.getElementById("memoryDescription");
@@ -832,23 +834,43 @@ function getUiLanguage() {
     return null;
 }
 
+function setMemoryLanguage(selectedLanguage) {
+    localStorage.setItem("language", selectedLanguage);
+
+    game.lang = selectedLanguage;
+    settings.language = selectedLanguage;
+
+    updateMenuLanguage();
+    renderMemory();
+}
+
 function renderMemory() {
     const language = getUiLanguage();
     const clearedChapters = getClearedChapters();
 
+    memoryJaButton.classList.toggle(
+        "active",
+        language === "ja"
+    );
+
+    memoryEnButton.classList.toggle(
+        "active",
+        language === "en"
+    );
+
     memoryChapterList.innerHTML = "";
 
     if (language === "ja") {
-        memoryTitle.textContent = "Memory";
+        memoryTitle.textContent = "Memories";
         memoryDescription.textContent = "魔導書に刻まれた記憶";
         closeMemoryButton.setAttribute("aria-label", "閉じる");
     } else if (language === "en") {
-        memoryTitle.textContent = "Memory";
+        memoryTitle.textContent = "Memories";
         memoryDescription.textContent =
             "Memories engraved upon the Grimoire";
         closeMemoryButton.setAttribute("aria-label", "Close");
     } else {
-        memoryTitle.textContent = "Memory";
+        memoryTitle.textContent = "Memories";
         memoryDescription.textContent =
             "Memories engraved upon the Grimoire / 魔導書に刻まれた記憶";
         closeMemoryButton.setAttribute(
@@ -917,6 +939,15 @@ function closeMemory() {
 }
 
 memoryButton.addEventListener("click", openMemory);
+
+memoryJaButton.addEventListener("click", () => {
+    setMemoryLanguage("ja");
+});
+
+memoryEnButton.addEventListener("click", () => {
+    setMemoryLanguage("en");
+});
+
 closeMemoryButton.addEventListener("click", closeMemory);
 
 memoryModal.addEventListener("click", (event) => {
