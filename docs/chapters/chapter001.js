@@ -116,7 +116,7 @@ const chapter1 = {
                 },
                 {
                     ja: "もう少しです。\nprint(name)\nとしてみましょう。\nname = \"なんらかの文字\" を既に入れてしまった場合は、name = \"{player}\" としたのち、\nprint(name)\nとしてみましょう。",
-                    en: "Almost there.\nTry typing:\nprint(name)\nIf you've already changed name = \"some text\", set it back to\nname = \"{player}\"\nand then try:\nprint(name)"
+                    en: "Almost there.\nTry typing: print(name)\nIf you've already changed name = \"some text\", set it back to\nname = \"{player}\"\nand then try: print(name)"
                 }
             ]
         }
