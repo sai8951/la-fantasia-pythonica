@@ -13,6 +13,9 @@ const closeMenuButton = document.getElementById("closeMenuButton");
 const menuTitle = document.getElementById("menuTitle");
 const grimoireLink = document.getElementById("grimoireLink");
 
+const MANUSCRIPT_OBTAINED_KEY = "manuscriptObtained";
+const GRIMOIRE_AWAKENED_KEY = "grimoireAwakened";
+
 const chapterTitleScreen = document.getElementById("chapterTitleScreen");
 const chapterNumber = document.getElementById("chapterNumber");
 const chapterTitleText = document.getElementById("chapterTitleText");
@@ -182,6 +185,7 @@ function playFlash() {
 }
 
 function openMenu() {
+    updateGrimoireMenuVisibility();
     menuOverlay.classList.remove("hidden");
     menuButton.setAttribute("aria-expanded", "true");
 }
@@ -389,6 +393,12 @@ function signContract() {
 
     game.playerName = name;
     localStorage.setItem("playerName", name);
+
+    localStorage.setItem(
+        MANUSCRIPT_OBTAINED_KEY,
+        "true"
+    );
+    updateGrimoireMenuVisibility();
 
     contractScreen.classList.add("hidden");
     gameScreen.classList.remove("hidden");
@@ -695,6 +705,9 @@ async function runCode() {
     if (!result.error && normalizeOutput(result.stdout) === expectedOutput) {
         game.questionSolved = true;
 
+        const unlockedNewPage =
+            unlockGrimoirePage(question.grimoirePageId);
+
         consoleOutput.textContent = fillText(question.success[game.lang]);
         consoleElement.scrollTop = 0;
 
@@ -726,6 +739,19 @@ function handleWrongAnswer() {
 }
 
 function finishQuestion() {
+    const question =
+        currentChapter.questions[game.currentQuestion];
+
+    const awakenedNow =
+        question.awakensGrimoire === true
+            ? awakenGrimoire()
+            : false;
+
+    const unlockedNewPage =
+        unlockGrimoirePage(
+            question.grimoirePageId
+        );
+
     game.questionSolved = false;
     game.currentQuestion = null;
 
@@ -734,11 +760,124 @@ function finishQuestion() {
 
     endQuestion();
 
-    index++;
-    showMessage();
+    // paper -> grimoire
+    updateGrimoireMenuVisibility();
+
+    function continueStory() {
+        index++;
+        showMessage();
+    }
+
+    continueStory();
+
+    if (awakenedNow) {
+        playGrimoireMenuEffect(
+            "awakening",
+            continueStory
+        );
+        return;
+    }
+
+    if (unlockedNewPage) {
+        playGrimoireMenuEffect(
+            "page",
+            continueStory
+        );
+        return;
+    }
+}
+
+function updateGrimoireMenuVisibility() {
+    grimoireLink.classList.toggle(
+        "hidden",
+        !hasGrimoireAwakened()
+    );
+}
+
+function playGrimoireMenuEffect(type, onComplete) {
+    const effectClass =
+        type === "awakening"
+            ? "grimoire-awakening"
+            : "grimoire-page-added";
+
+    menuButton.classList.remove(
+        "grimoire-awakening",
+        "grimoire-page-added"
+    );
+
+    // 同じclassを付け直した場合でも
+    // CSSアニメーションを最初から再生する
+    void menuButton.offsetWidth;
+
+    menuButton.classList.add(effectClass);
+
+    const duration =
+        type === "awakening"
+            ? 4200
+            : 2600;
+
+    window.setTimeout(() => {
+        menuButton.classList.remove(effectClass);
+
+        onComplete();
+    }, duration);
 }
 
 successHint.addEventListener("click", finishQuestion);
+
+function hasManuscript() {
+    return localStorage.getItem(
+        MANUSCRIPT_OBTAINED_KEY
+    ) === "true";
+}
+
+function hasGrimoireAwakened() {
+    return localStorage.getItem(
+        GRIMOIRE_AWAKENED_KEY
+    ) === "true";
+}
+
+function hasGrimoireAwakened() {
+    return localStorage.getItem(
+        GRIMOIRE_AWAKENED_KEY
+    ) === "true";
+}
+
+function awakenGrimoire() {
+    if (hasGrimoireAwakened()) {
+        return false;
+    }
+
+    localStorage.setItem(
+        GRIMOIRE_AWAKENED_KEY,
+        "true"
+    );
+
+    return true;
+}
+
+function updateGrimoireMenuVisibility() {
+    grimoireLink.classList.toggle(
+        "hidden",
+        !hasManuscript()
+    );
+
+    if (!hasManuscript()) {
+        return;
+    }
+
+    if (hasGrimoireAwakened()) {
+        grimoireLink.textContent =
+            game.lang === "en"
+                ? "Grimoire"
+                : "魔導書";
+    } else {
+        grimoireLink.textContent =
+            game.lang === "en"
+                ? "Mysterious Pages"
+                : "謎の紙";
+    }
+}
 
 const savedLanguage = localStorage.getItem("language");
 
@@ -747,6 +886,100 @@ if (savedLanguage === "ja" || savedLanguage === "en") {
 }
 
 updateMenuLanguage();
+
+const UNLOCKED_GRIMOIRE_PAGES_KEY =
+    "unlockedGrimoirePages";
+
+function getUnlockedGrimoirePages() {
+    const raw = localStorage.getItem(
+        UNLOCKED_GRIMOIRE_PAGES_KEY
+    );
+
+    if (!raw) {
+        return [];
+    }
+
+    try {
+        const parsed = JSON.parse(raw);
+
+        return Array.isArray(parsed)
+            ? parsed.filter(
+                (id) => typeof id === "string"
+            )
+            : [];
+    } catch {
+        return [];
+    }
+}
+
+function unlockGrimoirePage(pageId) {
+    if (!pageId) {
+        return false;
+    }
+
+    const unlockedPages =
+        getUnlockedGrimoirePages();
+
+    if (unlockedPages.includes(pageId)) {
+        return false;
+    }
+
+    unlockedPages.push(pageId);
+
+    localStorage.setItem(
+        UNLOCKED_GRIMOIRE_PAGES_KEY,
+        JSON.stringify(unlockedPages)
+    );
+
+    return true;
+}
+
+function findGrimoirePage(pageId) {
+    return grimoirePages.find(
+        (page) => page.id === pageId
+    );
+}
+
+function playGrimoireEffect(type, question, onComplete) {
+    if (type === "awakening") {
+        grimoireUnlockLabel.textContent =
+            game.lang === "ja"
+                ? "謎の紙束が光を帯びた"
+                : "The mysterious pages began to glow";
+
+        grimoireUnlockTitle.textContent =
+            game.lang === "ja"
+                ? "魔導書が目覚めた"
+                : "The Grimoire Awakened";
+    } else {
+        grimoireUnlockLabel.textContent =
+            game.lang === "ja"
+                ? "魔導書に新たな頁が刻まれた"
+                : "A new page was inscribed in the Grimoire";
+
+        grimoireUnlockTitle.textContent =
+            question.grimoireUnlockTitle?.[game.lang]
+            ?? (
+                game.lang === "ja"
+                    ? "新たな頁"
+                    : "A New Page"
+            );
+    }
+
+    grimoireUnlockOverlay.classList.remove("hidden");
+    grimoireUnlockOverlay.classList.remove("show");
+
+    void grimoireUnlockOverlay.offsetWidth;
+
+    grimoireUnlockOverlay.classList.add("show");
+
+    window.setTimeout(() => {
+        grimoireUnlockOverlay.classList.add("hidden");
+        grimoireUnlockOverlay.classList.remove("show");
+
+        onComplete();
+    }, 1000);
+}
 
 const CLEARED_CHAPTERS_KEY = "clearedChapters";
 
@@ -1123,3 +1356,16 @@ const restoredFromGrimoire =
 if (!restoredFromGrimoire) {
     updateMenuLanguage();
 }
+
+// Debug
+window.resetGrimoireTest = function () {
+    localStorage.removeItem("manuscriptObtained");
+    localStorage.removeItem("grimoireAwakened");
+    // localStorage.setItem("manuscriptObtained", "true");
+    localStorage.removeItem("unlockedGrimoirePages");
+
+    console.log("Grimoire test state reset.");
+};
+// type these command in the console to reset the grimoire state for testing purposes.
+// resetGrimoireTest();
+// location.reload();

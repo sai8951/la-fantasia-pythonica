@@ -67,6 +67,15 @@ const chapter1 = {
 
     questions: {
         print_name: {
+            grimoirePageId: "chapter_001_print",
+
+            awakensGrimoire: true,
+
+            grimoireUnlockTitle: {
+                ja: "第一頁: 声を世界へ届ける術",
+                en: "Page One: The Spell That Gives Voice"
+            },
+
             instruction: {
                 ja: "あなたの name を世界へ響かせてください。",
                 en: "Echo your name into the world."

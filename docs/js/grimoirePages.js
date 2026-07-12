@@ -1,6 +1,6 @@
 export const grimoirePages = [
     {
-        id: "print",
+        id: "chapter_001_print",
 
         title: {
             ja: "第一頁: 声を世界へ届ける術",
@@ -18,7 +18,7 @@ export const grimoirePages = [
     },
 
     {
-        id: "variable",
+        id: "chapter_002_variable",
 
         title: {
             ja: "第二頁: 名を器に宿す術",

@@ -527,6 +527,12 @@ h1 {
 
     font-size: 1.5rem;
     line-height: 1;
+
+    overflow: visible;
+    isolation: isolate;
+    transition:
+        border-color 0.3s ease,
+        box-shadow 0.3s ease;
 }
 
 .menu-button > span[aria-hidden="true"] {
@@ -700,6 +706,210 @@ h1 {
     transform: none;
 }
 
+/* --------------------------------
+   Grimoire awakening effect
+-------------------------------- */
+
+.menu-button::before,
+.menu-button::after {
+    content: "";
+
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: -1;
+
+    border-radius: 50%;
+
+    opacity: 0;
+    pointer-events: none;
+
+    transform: translate(-50%, -50%) scale(0.4);
+}
+
+
+/* ボタンのすぐ周囲から漏れる柔らかい光 */
+
+.menu-button::before {
+    width: 100%;
+    height: 100%;
+
+    background:
+    radial-gradient(
+        circle,
+        rgba(245,251,255,.95) 0%,
+        rgba(208,232,255,.55) 35%,
+        rgba(176,214,255,.18) 65%,
+        transparent 80%
+    );
+
+    filter: blur(5px);
+}
+
+
+/* もう一層外側へ広がる光 */
+
+.menu-button::after {
+    width: 130%;
+    height: 130%;
+
+    border: 1px solid rgba(215,235,255,0.55);
+
+    box-shadow:
+        0 0 8px rgba(240,248,255,.75),
+        0 0 18px rgba(208,232,255,.45),
+        0 0 34px rgba(176,214,255,.20);
+}
+
+
+/* 初回：紙束が魔導書へ覚醒 */
+
+.menu-button.grimoire-awakening {
+    animation:
+        grimoireButtonGlow 1.5s ease-in-out 1;
+}
+
+.menu-button.grimoire-awakening::before {
+    animation:
+        grimoireInnerAura 1.5s ease-in-out 1;
+}
+
+.menu-button.grimoire-awakening::after {
+    animation:
+        grimoireOuterAura 1.5s ease-out 1;
+}
+
+.menu-button.grimoire-awakening > span {
+    animation:
+        grimoireIconGlow 1.5s ease-in-out 1;
+}
+
+
+/* 2頁目以降：少し控えめ */
+
+.menu-button.grimoire-page-added {
+    animation:
+        grimoireButtonGlow 0.75s ease-in-out 1;
+}
+
+.menu-button.grimoire-page-added::before {
+    animation:
+        grimoireInnerAura 0.75s ease-in-out 1;
+}
+
+.menu-button.grimoire-page-added::after {
+    animation:
+        grimoireOuterAura 0.75s ease-out 1;
+}
+
+.menu-button.grimoire-page-added > span {
+    animation:
+        grimoireIconGlow 0.75s ease-in-out 1;
+}
+
+
+/* ボタン本体 */
+
+@keyframes grimoireButtonGlow {
+    0%,
+    100% {
+        border-color: #c8a96b;
+
+        box-shadow:
+            inset 0 0 8px rgba(255, 230, 160, 0.12),
+            0 0 8px rgba(200, 169, 107, 0.25);
+    }
+
+    35%,
+    65% {
+        border-color: #d8ebff;
+
+        box-shadow:
+            inset 0 0 10px rgba(245,251,255,.18),
+            0 0 6px rgba(245,251,255,.7),
+            0 0 18px rgba(208,232,255,.42),
+            0 0 36px rgba(176,214,255,.18);
+        }
+}
+
+
+/* ボタンに密着した光 */
+
+@keyframes grimoireInnerAura {
+    0%,
+    100% {
+        opacity: 0;
+        transform:
+            translate(-50%, -50%)
+            scale(0.45);
+    }
+
+    35% {
+        opacity: 1;
+        transform:
+            translate(-50%, -50%)
+            scale(1.55);
+    }
+
+    65% {
+        opacity: 0.75;
+        transform:
+            translate(-50%, -50%)
+            scale(1.9);
+    }
+}
+
+
+/* 外へ膨らむ光の輪 */
+
+@keyframes grimoireOuterAura {
+    0% {
+        opacity: 0;
+        transform:
+            translate(-50%, -50%)
+            scale(0.55);
+    }
+
+    30% {
+        opacity: 0.95;
+    }
+
+    100% {
+        opacity: 0;
+        transform:
+            translate(-50%, -50%)
+            scale(2.1);
+    }
+}
+
+
+/* ☰そのもの */
+
+@keyframes grimoireIconGlow {
+    0%,
+    100% {
+        color: #f3e7c0;
+        text-shadow: none;
+    }
+
+    35%,
+    65% {
+        color: white;
+
+        text-shadow:
+            0 0 2px rgba(255,255,255,.9),
+            0 0 8px rgba(220,240,255,.55),
+            0 0 14px rgba(190,220,255,.28);
+    }
+}
+
+
+/* 共通button:hoverによる移動を防ぐ */
+
+.menu-button.grimoire-awakening:hover:not(:disabled),
+.menu-button.grimoire-page-added:hover:not(:disabled) {
+    transform: none;
+}
 
 /* Memory */
 
