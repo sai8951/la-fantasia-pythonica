@@ -80,7 +80,7 @@ const chapter1 = {
                     en: "Attempting to connect to an ancient body of knowledge..."
                 },
                 timeout: {
-                    ja: "術式が終わりなき環へ迷い込みました。魔力の奔流を断ち切ります……",
+                    ja: "術式が終わりなき環へ迷い込みました。魔力の奔流を断ち切ります......",
                     en: "The spell woven from the ancient system of magic has become trapped in an endless loop. Severing the flow of mana..."
                 },
                 loadError: {
@@ -92,7 +92,7 @@ const chapter1 = {
                     en: "🔮 Future Insight 🔮"
                 },
                 noOutput: {
-                    ja: "世界はまだ、何も語らない。",
+                    ja: "世界は、何も語らない。",
                     en: "The world remains silent."
                 }
             },
