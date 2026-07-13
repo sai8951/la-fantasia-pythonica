@@ -354,7 +354,8 @@ body {
     }
 
     .page-content {
-        min-height: auto;
+        min-height: 50vh;
+        min-height: 50dvh;
         padding: 1.4rem;
     }
 

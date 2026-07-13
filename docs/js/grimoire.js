@@ -1,6 +1,8 @@
 import { grimoirePages } from "./grimoirePages.js";
 
-let language = localStorage.getItem("language");
+const saveData = loadGame();
+
+let language = saveData.language;
 
 if (language !== "ja" && language !== "en") {
     language = null;
@@ -13,15 +15,22 @@ const backButton = document.getElementById("backButton");
 const jaButton = document.getElementById("jaButton");
 const enButton = document.getElementById("enButton");
 
-const hasManuscript = localStorage.getItem("manuscriptObtained") === "true";
-const hasGrimoireAwakened = localStorage.getItem("grimoireAwakened") === "true";
+function hasManuscript() {
+    return saveData.flags.manuscriptObtained === "true";
+}
+
+function hasGrimoireAwakened() {
+    return saveData.flags.grimoireAwakened === "true";
+}
 
 const mobilePageSelect = document.getElementById("mobilePageSelect");
 const mobilePageLabel = document.getElementById("mobilePageLabel");
 
 function applyLanguage(selectedLanguage) {
     language = selectedLanguage;
-    localStorage.setItem("language", selectedLanguage);
+
+    saveData.language = selectedLanguage;
+    saveGame(saveData);
 
     jaButton.classList.toggle(
         "active",
@@ -123,12 +132,12 @@ function renderGrimoireState() {
             ? "← 戻る"
             : "← Back";
 
-    if (!hasManuscript) {
+    if (!hasManuscript()) {
         location.href = "./index.html";
         return;
     }
 
-    if (!hasGrimoireAwakened) {
+    if (!hasGrimoireAwakened()) {
         pageTitle.textContent =
             language === "ja"
                 ? "謎の紙"

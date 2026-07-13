@@ -1,5 +1,6 @@
 const startJaButton = document.getElementById("startJaButton");
 const startEnButton = document.getElementById("startEnButton");
+const continueButton = document.getElementById("continueButton");
 
 const titleScreen = document.getElementById("titleScreen");
 const contractScreen = document.getElementById("contractScreen");
@@ -13,8 +14,8 @@ const closeMenuButton = document.getElementById("closeMenuButton");
 const menuTitle = document.getElementById("menuTitle");
 const grimoireLink = document.getElementById("grimoireLink");
 
-const MANUSCRIPT_OBTAINED_KEY = "manuscriptObtained";
-const GRIMOIRE_AWAKENED_KEY = "grimoireAwakened";
+// const MANUSCRIPT_OBTAINED_KEY = "manuscriptObtained";
+// const GRIMOIRE_AWAKENED_KEY = "grimoireAwakened";
 
 const chapterTitleScreen = document.getElementById("chapterTitleScreen");
 const chapterNumber = document.getElementById("chapterNumber");
@@ -61,17 +62,30 @@ const closeMemoryButton = document.getElementById("closeMemoryButton");
 let currentChapter = chapter0;
 let chapterIndex = 0;
 
+let saveData = loadGame();
+
+const legacyLanguage = saveData.language;
+
+let language =
+    saveData.language === "ja" || saveData.language === "en"
+        ? saveData.language
+        : legacyLanguage;
+
+if (language !== "ja" && language !== "en") {
+    language = null;
+}
+
 const chapters = [
     chapter0,
     chapter1,
     chapter2
 ];
 
-const settings = {
-    language: localStorage.getItem("language"),
-    playerName: localStorage.getItem("playerName") || "",
-    playerLiteral: localStorage.getItem("playerLiteral") || ""
-};
+// const settings = {
+//     language: saveData.language,
+//     playerName: saveData.player.name || "",
+//     playerLiteral: saveData.player.literal || ""
+// };
 
 const game = {
     lang: null,
@@ -163,6 +177,113 @@ function executePython(code, context, timeoutMs) {
         worker.postMessage({ id, code, context });
     });
 }
+
+function canContinueGame() {
+    const chapterNumber =
+        Number(saveData.currentChapter);
+
+    const chapterExists = chapters.some(
+        (chapter) =>
+            Number(chapter.chapterNumber) === chapterNumber
+    );
+
+    return (
+        chapterExists &&
+        Number.isInteger(saveData.currentEventIndex) &&
+        saveData.player.name !== ""
+    );
+}
+
+function refreshTitleScreen() {
+    updateMenuLanguage();
+
+    const canContinue = canContinueGame();
+
+    continueButton.classList.toggle(
+        "hidden",
+        !canContinue
+    );
+
+    startJaButton.classList.toggle(
+        "hidden",
+        canContinue
+    );
+
+    startEnButton.classList.toggle(
+        "hidden",
+        canContinue
+    );
+
+    continueButton.textContent =
+        saveData.language === "ja"
+            ? "続きから"
+            : "Continue";
+}
+
+function continueGame() {
+    const savedChapterNumber =
+        Number(saveData.currentChapter);
+
+    const savedChapterIndex = chapters.findIndex(
+        (chapter) =>
+            Number(chapter.chapterNumber) ===
+            savedChapterNumber
+    );
+
+    if (savedChapterIndex === -1) {
+        console.error("Saved chapter was not found.");
+        return;
+    }
+
+    game.lang =
+        saveData.language === "en"
+            ? "en"
+            : "ja";
+
+    game.playerName =
+        saveData.player.name || "";
+
+    game.playerLiteral =
+        saveData.player.literal || "";
+
+    game.isReplay = false;
+    game.questionSolved = false;
+    game.currentQuestion = null;
+    game.isBusy = false;
+
+    chapterIndex = savedChapterIndex;
+    currentChapter = chapters[chapterIndex];
+
+    index = Number.isInteger(
+        saveData.currentEventIndex
+    )
+        ? saveData.currentEventIndex
+        : 0;
+
+    if (
+        index < 0 ||
+        index >= currentChapter.scenario.length
+    ) {
+        index = 0;
+    }
+
+    titleScreen.classList.add("hidden");
+    contractScreen.classList.add("hidden");
+    codeScreen.classList.add("hidden");
+    toBeContinued.classList.add("hidden");
+
+    gameScreen.classList.remove("hidden");
+
+    updateMenuLanguage();
+    updateGrimoireMenuVisibility();
+
+    showMessage();
+}
+
+continueButton.addEventListener(
+    "click",
+    continueGame
+);
 
 function playFlash() {
     game.isBusy = true;
@@ -263,6 +384,10 @@ function showChapterTitle() {
     );
     chapterTitleText.textContent = `〜${currentChapter.title[game.lang]}〜`;
 
+    saveData.currentChapter = currentChapter.chapterNumber;
+    saveData.currentEventIndex = 0;
+    saveGame(saveData);
+
     chapterTitleScreen.classList.remove("hidden");
     chapterTitleScreen.classList.remove("show");
 
@@ -281,8 +406,21 @@ function showChapterTitle() {
     }, 3000);
 }
 
+function saveCurrentProgress() {
+    saveData.language = game.lang;
+    saveData.currentChapter =
+        Number(currentChapter.chapterNumber);
+    saveData.currentEventIndex = index;
+
+    saveData.player.name = game.playerName;
+    saveData.player.literal = game.playerLiteral;
+
+    saveGame(saveData);
+}
+
 function nextMessage() {
     index++;
+    saveCurrentProgress();
 
     if (index >= currentChapter.scenario.length) {
         markChapterCleared(
@@ -313,6 +451,8 @@ function nextMessage() {
 
         currentChapter = chapters[chapterIndex];
         index = 0;
+
+        saveCurrentProgress();
         showMessage();
         return;
     }
@@ -356,10 +496,12 @@ document.addEventListener("keydown", (event) => {
 });
 
 function startContract(selectedLang) {
-    game.lang = selectedLang;
-    settings.language = selectedLang;
+    deleteSaveData();
+    saveData = loadGame();
 
-    localStorage.setItem("language", selectedLang);
+    game.lang = selectedLang;
+    saveData.language = selectedLang;
+    saveGame(saveData);
 
     updateMenuLanguage();
 
@@ -399,16 +541,10 @@ async function signContract() {
         game.playerName = name;
         game.playerLiteral = await createPlayerLiteral(name);
 
-        localStorage.setItem("playerName", name);
-        localStorage.setItem(
-            "playerLiteral",
-            game.playerLiteral
-        );
-
-        localStorage.setItem(
-            MANUSCRIPT_OBTAINED_KEY,
-            "true"
-        );
+        saveData.player.name = name;
+        saveData.player.literal = game.playerLiteral;
+        saveData.flags.manuscriptObtained = "true";
+        saveGame(saveData);
 
         updateGrimoireMenuVisibility();
 
@@ -416,6 +552,7 @@ async function signContract() {
         gameScreen.classList.remove("hidden");
 
         index++;
+        saveCurrentProgress();
         showMessage();
     } catch (error) {
         console.error(
@@ -788,12 +925,10 @@ async function runCode() {
     }
 
     const expectedOutput = fillText(question.expectedOutput);
+    const playersOutput = normalizeOutput(result.stdout);
 
-    if (!result.error && normalizeOutput(result.stdout) === expectedOutput) {
+    if (!result.error && playersOutput === expectedOutput) {
         game.questionSolved = true;
-
-        const unlockedNewPage =
-            unlockGrimoirePage(question.grimoirePageId);
 
         consoleOutput.textContent = fillText(question.success[game.lang]);
         consoleElement.scrollTop = 0;
@@ -852,6 +987,7 @@ function finishQuestion() {
 
     function continueStory() {
         index++;
+        saveCurrentProgress();
         showMessage();
     }
 
@@ -905,21 +1041,11 @@ function playGrimoireMenuEffect(type) {
 successHint.addEventListener("click", finishQuestion);
 
 function hasManuscript() {
-    return localStorage.getItem(
-        MANUSCRIPT_OBTAINED_KEY
-    ) === "true";
+    return saveData.flags.manuscriptObtained === "true";
 }
 
 function hasGrimoireAwakened() {
-    return localStorage.getItem(
-        GRIMOIRE_AWAKENED_KEY
-    ) === "true";
-}
-
-function hasGrimoireAwakened() {
-    return localStorage.getItem(
-        GRIMOIRE_AWAKENED_KEY
-    ) === "true";
+    return saveData.flags.grimoireAwakened === "true";
 }
 
 function awakenGrimoire() {
@@ -927,10 +1053,8 @@ function awakenGrimoire() {
         return false;
     }
 
-    localStorage.setItem(
-        GRIMOIRE_AWAKENED_KEY,
-        "true"
-    );
+    saveData.flags.grimoireAwakened = "true";
+    saveGame(saveData);
 
     return true;
 }
@@ -958,7 +1082,7 @@ function updateGrimoireMenuVisibility() {
     }
 }
 
-const savedLanguage = localStorage.getItem("language");
+const savedLanguage = saveData.language;
 
 if (savedLanguage === "ja" || savedLanguage === "en") {
     game.lang = savedLanguage;
@@ -966,29 +1090,8 @@ if (savedLanguage === "ja" || savedLanguage === "en") {
 
 updateMenuLanguage();
 
-const UNLOCKED_GRIMOIRE_PAGES_KEY =
-    "unlockedGrimoirePages";
-
 function getUnlockedGrimoirePages() {
-    const raw = localStorage.getItem(
-        UNLOCKED_GRIMOIRE_PAGES_KEY
-    );
-
-    if (!raw) {
-        return [];
-    }
-
-    try {
-        const parsed = JSON.parse(raw);
-
-        return Array.isArray(parsed)
-            ? parsed.filter(
-                (id) => typeof id === "string"
-            )
-            : [];
-    } catch {
-        return [];
-    }
+    return saveData.unlockedGrimoirePages;
 }
 
 function unlockGrimoirePage(pageId) {
@@ -996,19 +1099,14 @@ function unlockGrimoirePage(pageId) {
         return false;
     }
 
-    const unlockedPages =
-        getUnlockedGrimoirePages();
-
-    if (unlockedPages.includes(pageId)) {
+    if (
+        saveData.unlockedGrimoirePages.includes(pageId)
+    ) {
         return false;
     }
 
-    unlockedPages.push(pageId);
-
-    localStorage.setItem(
-        UNLOCKED_GRIMOIRE_PAGES_KEY,
-        JSON.stringify(unlockedPages)
-    );
+    saveData.unlockedGrimoirePages.push(pageId);
+    saveGame(saveData);
 
     return true;
 }
@@ -1019,40 +1117,21 @@ function findGrimoirePage(pageId) {
     );
 }
 
-const CLEARED_CHAPTERS_KEY = "clearedChapters";
-
 function getClearedChapters() {
-    const raw = localStorage.getItem(CLEARED_CHAPTERS_KEY);
-
-    if (!raw) {
-        return [];
-    }
-
-    try {
-        const parsed = JSON.parse(raw);
-
-        if (!Array.isArray(parsed)) {
-            return [];
-        }
-
-        return parsed.filter(Number.isInteger);
-    } catch {
-        return [];
-    }
+    return saveData.clearedChapters;
 }
 
 function markChapterCleared(chapterNumber) {
-    const cleared = getClearedChapters();
-
-    if (!cleared.includes(chapterNumber)) {
-        cleared.push(chapterNumber);
-        cleared.sort((a, b) => a - b);
-
-        localStorage.setItem(
-            CLEARED_CHAPTERS_KEY,
-            JSON.stringify(cleared)
-        );
+    if (
+        saveData.clearedChapters.includes(chapterNumber)
+    ) {
+        return;
     }
+
+    saveData.clearedChapters.push(chapterNumber);
+    saveData.clearedChapters.sort((a, b) => a - b);
+
+    saveGame(saveData);
 }
 
 function showReplayQuestionChoice(questionId) {
@@ -1096,7 +1175,7 @@ skipQuestionButton.addEventListener("click", () => {
 });
 
 function getUiLanguage() {
-    const storedLanguage = localStorage.getItem("language");
+    const storedLanguage = saveData.language;
 
     if (storedLanguage === "ja" || storedLanguage === "en") {
         return storedLanguage;
@@ -1106,10 +1185,9 @@ function getUiLanguage() {
 }
 
 function setMemoryLanguage(selectedLanguage) {
-    localStorage.setItem("language", selectedLanguage);
-
     game.lang = selectedLanguage;
-    settings.language = selectedLanguage;
+    saveData.language = selectedLanguage;
+    saveGame(saveData);
 
     updateMenuLanguage();
     renderMemory();
@@ -1133,17 +1211,17 @@ function renderMemory() {
 
     if (language === "ja") {
         memoryTitle.textContent = "Memories";
-        memoryDescription.textContent = "魔導書に刻まれた記憶";
+        memoryDescription.textContent = "";
         closeMemoryButton.setAttribute("aria-label", "閉じる");
     } else if (language === "en") {
         memoryTitle.textContent = "Memories";
         memoryDescription.textContent =
-            "Memories engraved upon the Grimoire";
+            "";
         closeMemoryButton.setAttribute("aria-label", "Close");
     } else {
         memoryTitle.textContent = "Memories";
         memoryDescription.textContent =
-            "Memories engraved upon the Grimoire / 魔導書に刻まれた記憶";
+            "";
         closeMemoryButton.setAttribute(
             "aria-label",
             "Close / 閉じる"
@@ -1240,9 +1318,9 @@ function startReplay(chapterNumber) {
 
     const savedLanguage = getUiLanguage();
     const savedPlayerName =
-        localStorage.getItem("playerName") || "";
+        saveData.player.name || "";
     const savedPlayerLiteral =
-        localStorage.getItem("playerLiteral") || "";
+        saveData.player.literal || "";
 
     game.lang = savedLanguage || "ja";
     game.playerName = savedPlayerName;
@@ -1346,7 +1424,7 @@ function restoreGrimoireReturnState() {
         typeof state.playerLiteral === "string" &&
         state.playerLiteral !== ""
             ? state.playerLiteral
-            : localStorage.getItem("playerLiteral") || "";
+            : saveData.player.literal || "";
 
     game.isReplay = Boolean(state.isReplay);
     game.currentQuestion = state.currentQuestion ?? null;
@@ -1398,23 +1476,19 @@ function restoreGrimoireReturnState() {
     return true;
 }
 
-const restoredFromGrimoire =
-    restoreGrimoireReturnState();
+const isGamePage =
+    document.getElementById("gameScreen") !== null;
 
-if (!restoredFromGrimoire) {
-    updateMenuLanguage();
+let restoredFromGrimoire = false;
+
+if (isGamePage) {
+    restoredFromGrimoire =
+        restoreGrimoireReturnState();
 }
 
-// Debug
-window.resetGrimoireTest = function () {
-    localStorage.removeItem("manuscriptObtained");
-    localStorage.removeItem("grimoireAwakened");
-    // localStorage.setItem("manuscriptObtained", "true");
-    localStorage.removeItem("unlockedGrimoirePages");
-    localStorage.removeItem("playerName");
-    localStorage.removeItem("playerLiteral");
+if (!restoredFromGrimoire && isGamePage) {
+    refreshTitleScreen();
+}
 
-    console.log("Grimoire test state reset.");
-};
 // type these command in the console to reset the grimoire state for testing purposes.
-// resetGrimoireTest(); location.reload();
+// deleteSaveData(); location.reload();
