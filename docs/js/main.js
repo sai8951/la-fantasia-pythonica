@@ -69,12 +69,14 @@ const chapters = [
 
 const settings = {
     language: localStorage.getItem("language"),
-    playerName: localStorage.getItem("playerName") || ""
+    playerName: localStorage.getItem("playerName") || "",
+    playerLiteral: localStorage.getItem("playerLiteral") || ""
 };
 
 const game = {
     lang: null,
     playerName: "",
+    playerLiteral: "",
     mistakeCount: 0,
     currentQuestion: null,
     questionSolved: false,
@@ -383,7 +385,7 @@ function showContractScreen() {
     nameInput.focus();
 }
 
-function signContract() {
+async function signContract() {
     const name = nameInput.value.trim();
 
     if (name === "") {
@@ -391,20 +393,85 @@ function signContract() {
         return;
     }
 
-    game.playerName = name;
-    localStorage.setItem("playerName", name);
+    signButton.disabled = true;
 
-    localStorage.setItem(
-        MANUSCRIPT_OBTAINED_KEY,
-        "true"
-    );
-    updateGrimoireMenuVisibility();
+    try {
+        game.playerName = name;
+        game.playerLiteral = await createPlayerLiteral(name);
 
-    contractScreen.classList.add("hidden");
-    gameScreen.classList.remove("hidden");
+        localStorage.setItem("playerName", name);
+        localStorage.setItem(
+            "playerLiteral",
+            game.playerLiteral
+        );
 
-    index++;
-    showMessage();
+        localStorage.setItem(
+            MANUSCRIPT_OBTAINED_KEY,
+            "true"
+        );
+
+        updateGrimoireMenuVisibility();
+
+        contractScreen.classList.add("hidden");
+        gameScreen.classList.remove("hidden");
+
+        index++;
+        showMessage();
+    } catch (error) {
+        console.error(
+            "Failed to create player literal:",
+            error
+        );
+
+        alert(
+            game.lang === "ja"
+                ? "契約の術式を読み込めませんでした。もう一度お試しください。"
+                : "The contract spell could not be loaded. Please try again."
+        );
+    } finally {
+        signButton.disabled = false;
+    }
+}
+
+async function createPlayerLiteral(name) {
+    const worker = getPythonWorker();
+    const id = ++pythonRequestId;
+
+    return new Promise((resolve, reject) => {
+        function cleanup() {
+            worker.removeEventListener("message", onMessage);
+            worker.removeEventListener("error", onError);
+        }
+
+        function onMessage(event) {
+            if (event.data?.id !== id) {
+                return;
+            }
+
+            cleanup();
+
+            if (event.data.workerError) {
+                reject(new Error(event.data.error));
+                return;
+            }
+
+            resolve(event.data.playerLiteral);
+        }
+
+        function onError(event) {
+            cleanup();
+            reject(event.error ?? new Error("Python worker error"));
+        }
+
+        worker.addEventListener("message", onMessage);
+        worker.addEventListener("error", onError);
+
+        worker.postMessage({
+            id,
+            command: "repr",
+            context: { name }
+        });
+    });
 }
 
 function showMessage() {
@@ -541,7 +608,19 @@ codeInput.addEventListener("keydown", (event) => {
     }
 });
 
-codeInput.addEventListener("input", updateLineNumbers);
+codeInput.addEventListener("input", () => {
+    const start = codeInput.selectionStart;
+    const end = codeInput.selectionEnd;
+
+    const normalized = normalizeCode(codeInput.value);
+
+    if (normalized !== codeInput.value) {
+        codeInput.value = normalized;
+        codeInput.setSelectionRange(start, end);
+    }
+
+    updateLineNumbers();
+});
 
 updateLineNumbers();
 
@@ -571,7 +650,9 @@ function startQuestion() {
 }
 
 function fillText(text) {
-    return text.replace("{player}", game.playerName);
+    return text
+        .replaceAll("{playerLiteral}", game.playerLiteral)
+        .replaceAll("{player}", game.playerName);
 }
 
 function startQuestionById(questionId) {
@@ -650,7 +731,7 @@ async function executeCurrentCode(code, question) {
 }
 
 async function previewCode() {
-    const code = codeInput.value;
+    const code = normalizeCode(codeInput.value);
     const consoleBox = document.getElementById("console");
     const question = currentChapter.questions[game.currentQuestion];
 
@@ -682,9 +763,15 @@ futureSightButton.addEventListener("click", (event) => {
     previewCode();
 });
 
+function normalizeCode(code) {
+    return code
+        .replace(/[“”]/g, '"')
+        .replace(/[‘’]/g, "'");
+}
+
 async function runCode() {
     document.getElementById("console").classList.remove("futureSight");
-    const code = codeInput.value;
+    const code = normalizeCode(codeInput.value);
     const question = currentChapter.questions[game.currentQuestion];
     let result;
 
@@ -1154,9 +1241,12 @@ function startReplay(chapterNumber) {
     const savedLanguage = getUiLanguage();
     const savedPlayerName =
         localStorage.getItem("playerName") || "";
+    const savedPlayerLiteral =
+        localStorage.getItem("playerLiteral") || "";
 
     game.lang = savedLanguage || "ja";
     game.playerName = savedPlayerName;
+    game.playerLiteral = savedPlayerLiteral;
     game.isReplay = true;
     game.questionSolved = false;
     game.currentQuestion = null;
@@ -1195,6 +1285,7 @@ function saveGrimoireReturnState() {
         isReplay: game.isReplay,
         screen,
         playerName: game.playerName,
+        playerLiteral: game.playerLiteral,
         language: game.lang,
         currentQuestion: game.currentQuestion,
         code: codeInput.value,
@@ -1250,6 +1341,12 @@ function restoreGrimoireReturnState() {
         typeof state.playerName === "string"
             ? state.playerName
             : "";
+
+    game.playerLiteral =
+        typeof state.playerLiteral === "string" &&
+        state.playerLiteral !== ""
+            ? state.playerLiteral
+            : localStorage.getItem("playerLiteral") || "";
 
     game.isReplay = Boolean(state.isReplay);
     game.currentQuestion = state.currentQuestion ?? null;
@@ -1314,9 +1411,10 @@ window.resetGrimoireTest = function () {
     localStorage.removeItem("grimoireAwakened");
     // localStorage.setItem("manuscriptObtained", "true");
     localStorage.removeItem("unlockedGrimoirePages");
+    localStorage.removeItem("playerName");
+    localStorage.removeItem("playerLiteral");
 
     console.log("Grimoire test state reset.");
 };
 // type these command in the console to reset the grimoire state for testing purposes.
-// resetGrimoireTest();
-// location.reload();
+// resetGrimoireTest(); location.reload();

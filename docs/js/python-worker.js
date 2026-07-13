@@ -60,12 +60,31 @@ _pythonica_stderr_value = _pythonica_stderr.getvalue()
 `;
 
 self.onmessage = async (event) => {
-    const { id, code, context } = event.data;
+    const { id, code, context, command } = event.data;
+
     let dict;
     let globals;
 
     try {
         const pyodide = await pyodidePromise;
+
+        if (command === "repr") {
+            dict = pyodide.globals.get("dict");
+            globals = dict(Object.entries(context));
+
+            const playerLiteral = pyodide.runPython(
+                "repr(name)",
+                { globals }
+            );
+
+            self.postMessage({
+                id,
+                playerLiteral
+            });
+
+            return;
+        }
+
         self.postMessage({ id, phase: "running" });
 
         dict = pyodide.globals.get("dict");
@@ -74,31 +93,44 @@ self.onmessage = async (event) => {
 
         await pyodide.runPythonAsync(runner, { globals });
 
-        const errorKind = globals.get("_pythonica_error_kind");
-        const hasExecutionError = errorKind !== null && errorKind !== undefined;
+        const errorKind =
+            globals.get("_pythonica_error_kind");
+
+        const hasExecutionError =
+            errorKind !== null &&
+            errorKind !== undefined;
+
         self.postMessage({
             id,
             stdout: globals.get("_pythonica_stdout_value"),
             stderr: globals.get("_pythonica_stderr_value"),
-            ...(hasExecutionError ? {
-                error: {
-                    kind: errorKind,
-                    line: globals.get("_pythonica_error_line")
+            ...(hasExecutionError
+                ? {
+                    error: {
+                        kind: errorKind,
+                        line: globals.get(
+                            "_pythonica_error_line"
+                        )
+                    }
                 }
-            } : {})
+                : {})
         });
     } catch (error) {
         self.postMessage({
             id,
             stdout: "",
             stderr: "",
-            error: error instanceof Error ? error.message : String(error),
+            error:
+                error instanceof Error
+                    ? error.message
+                    : String(error),
             workerError: true
         });
     } finally {
         if (globals) {
             globals.destroy();
         }
+
         if (dict) {
             dict.destroy();
         }

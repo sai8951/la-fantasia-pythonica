@@ -115,12 +115,12 @@ const chapter1 = {
 
             hints: [
                 {
-                    ja: "契約で刻んだ名前は 変数 name に\nname = \"{player}\"\nとして宿っています。\nname を出力してください。",
-                    en: "The name you inscribed upon the contract now dwells within the variable name as\nname = \"{player}\"\nOutput name."
+                    ja: "契約で刻んだ名前は 変数 name に\nname = {playerLiteral}\nとして宿っています。\nname を出力してください。",
+                    en: "The name you inscribed upon the contract now dwells within the variable name as\nname = {playerLiteral}\nOutput name."
                 },
                 {
-                    ja: "もう少しです。\nprint(name)\nとしてみましょう。\nname = \"なんらかの文字\" を既に入れてしまった場合は\nname = \"{player}\" としたのち、\nprint(name)\nとしてみましょう。",
-                    en: "Almost there.\nTry typing: print(name)\nIf you've already changed name = \"some text\", set it back to\nname = \"{player}\"\nand then try: print(name)"
+                    ja: "もう少しです。\nprint(name)\nとしてみましょう。\nname = \"なんらかの文字\" を既に入れてしまった場合は\nname = {playerLiteral} としたのち、\nprint(name)\nとしてみましょう。",
+                    en: "Almost there.\nTry typing: print(name)\nIf you've already changed name = \"some text\", set it back to\nname = {playerLiteral}\nand then try: print(name)"
                 }
             ]
         }
